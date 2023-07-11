@@ -1,1 +1,29 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/usedItemsTrade
+    username: root
+    password: 1111
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: honee8583@hs.ac.kr
+    password: dgsphdoftcjqzvtw
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+
+  jwt:
+    secret: dXNlZEl0ZW1zVHJhZGVKd3Rjb2RlCg==
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
