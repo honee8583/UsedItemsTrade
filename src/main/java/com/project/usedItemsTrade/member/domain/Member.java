@@ -7,6 +7,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -26,6 +27,9 @@ public class Member extends BaseEntity {
 
     private String phone;
 
+    @Enumerated(EnumType.STRING)
+    private MemberStatus status;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -38,9 +42,41 @@ public class Member extends BaseEntity {
 
     // email
     private String emailCode;
-    private String passwordResetCode;
+    private boolean emailAuthYn;
+
+    // reset password
+    private String passwordResetKey;
+    private LocalDateTime passwordResetLimitTime;
 
     public void updateRefreshToken(String refresh_token) {
         this.refresh_token = refresh_token;
+    }
+
+    public void updateMemberInfo(MemberRequestDto.MemberUpdateInfoDto updateInfoDto) {
+        this.name = updateInfoDto.getName();
+        this.phone = updateInfoDto.getPhone();
+    }
+
+    public void updateEmailAuth() {
+        this.emailAuthYn = true;
+        this.status = MemberStatus.AVAILABLE;
+    }
+
+    public void updatePasswordResetKey(String passwordResetKey, LocalDateTime limitTime) {
+        this.passwordResetKey = passwordResetKey;
+        this.passwordResetLimitTime = limitTime;
+    }
+
+    public void resetPassword(String newPwd) {
+        this.password = newPwd;
+    }
+
+    public void withdraw() {
+        this.password = null;
+        this.phone = null;
+        this.emailAuthYn = false;
+        this.status = MemberStatus.WITHDRAW;
+        this.role = null;
+        this.refresh_token = null;
     }
 }

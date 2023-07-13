@@ -25,4 +25,51 @@ public class MemberRequestDto {
         private String email;
         private String password;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class MemberJoinDto {
+        private String email;
+        private String password;
+        private String name;
+        private String phone;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class MemberUpdateInfoDto {
+        private String email;
+        private String name;
+        private String phone;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class ResetPasswordDto {
+        private String newPwd;
+        private String resetPasswordKey;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class MemberWithdrawDto {
+        private String email;
+        private String password;
+    }
 }
