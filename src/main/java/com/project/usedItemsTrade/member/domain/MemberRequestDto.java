@@ -72,4 +72,15 @@ public class MemberRequestDto {
         private String email;
         private String password;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class EmailDto {
+        private String email;
+        private String emailAuthCode;
+    }
 }

@@ -1,19 +1,21 @@
 package com.project.usedItemsTrade.member.service;
 
 import com.project.usedItemsTrade.member.domain.*;
+import com.project.usedItemsTrade.member.error.*;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import com.project.usedItemsTrade.member.service.impl.MemberServiceImpl;
 import com.project.usedItemsTrade.member.utils.MailUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperties;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,6 +82,27 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("회원가입 이미 존재하는 회원 예외 발생")
+    void testJoin_AlreadyExistMemberException() {
+        // given
+        MemberRequestDto.MemberJoinDto joinDto = MemberRequestDto.MemberJoinDto
+                .builder()
+                .email("user@email.com")
+                .password("1111")
+                .name("user")
+                .phone("010-1111-1111")
+                .build();
+
+        // when
+        when(memberRepository.findByEmail(joinDto.getEmail()))
+                .thenReturn(Optional.of(new Member()));
+
+        // then
+        assertThrows(AlreadyExistMemberException.class,
+                () -> memberService.join(joinDto));
+    }
+
+    @Test
     @DisplayName("비밀번호 초기화 이메일 발송 구현")
     void testSendPasswordResetMail() {
         // given
@@ -102,6 +125,19 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("비밀번호 초기화 발송시 존재하지 않는 회원 예외 발생")
+    void testSendPasswordResetMail_UserNotExistException() {
+        // given
+        String email = "user@email.com";
+
+        // when
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UserNotExistException.class, () -> memberService.sendPasswordResetMail(email));
+    }
+
+    @Test
     @DisplayName("회원정보 불러오기 테스트")
     void testMyInfo() {
         // given
@@ -117,6 +153,20 @@ class MemberServiceTest {
         assertEquals(memberInfoDto.getName(), member.getName());
         assertEquals(memberInfoDto.getPhone(), member.getPhone());
         assertEquals(memberInfoDto.getStatus(), member.getStatus());
+    }
+
+    @Test
+    @DisplayName("회원 정보 조회시 회원이 존재하지 않을 경우 예외 발생")
+    void testMyInfo_UserNotExistException() {
+        // given
+        String email = "user@email.com";
+
+        // when
+        when(memberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UserNotExistException.class, () -> memberService.myInfo(email));
+
     }
 
     @Test
@@ -149,6 +199,25 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("회원 정보 수정시 회원이 존재하지 않을 경우 예외 발생")
+    void testUpdateMyInfo_UserNotExistException() {
+        // given
+        String email = "user@email.com";
+        MemberRequestDto.MemberUpdateInfoDto infoDto = MemberRequestDto.MemberUpdateInfoDto
+                .builder()
+                .email("user@email.com")
+                .name("user")
+                .phone("010-1111-1111")
+                .build();
+
+        // when
+        when(memberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UserNotExistException.class, () -> memberService.updateMyInfo(infoDto));
+    }
+
+    @Test
     @DisplayName("이메일 인증 테스트")
     void testEmailAuth() {
         // given
@@ -168,6 +237,132 @@ class MemberServiceTest {
         Member savedMember = argumentCaptor.getValue();
         assertTrue(savedMember.isEmailAuthYn());
         assertEquals(savedMember.getStatus(), MemberStatus.AVAILABLE);
+    }
+
+    @Test
+    @DisplayName("이메일 인증시 존재하지 않는 회원일 경우 예외 발생")
+    void testEmailAuth_UserNotExistException() {
+        // given
+        String emailAuthCode = "emailAuthCode";
+
+        // when
+        when(memberRepository.findByEmailCode(emailAuthCode))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UserNotExistException.class, () -> memberService.emailAuth(emailAuthCode));
+    }
+
+    @Test
+    @DisplayName("이메일 인증시 이미 인증이 완료된 회원일 경우 예외 발생")
+    void testEmailAuth_AlreadyEmailAuthenticatedException() {
+        // given
+        String emailCode = "emailCode";
+
+        Member member = Member.builder()
+                .email("user@email.com")
+                .password("1111")
+                .name("user")
+                .phone("010-1111-1111")
+                .role(Role.USER)
+                .emailAuthYn(true)
+                .build();
+
+        // when
+        when(memberRepository.findByEmailCode(emailCode))
+                .thenReturn(Optional.of(member));
+
+        // then
+        assertThrows(AlreadyEmailAuthenticatedException.class,
+                () -> memberService.emailAuth(emailCode));
+    }
+
+    @Test
+    @DisplayName("비밀번호 초기화 테스트")
+    void testResetPassword() {
+        // given
+        Member member = Member.builder()
+                .passwordResetKey("passwordKey")
+                .passwordResetLimitTime(LocalDateTime.now().plusDays(1))
+                .build();
+
+        MemberRequestDto.ResetPasswordDto resetPasswordDto = MemberRequestDto.ResetPasswordDto
+                .builder()
+                .newPwd("2222")
+                .resetPasswordKey("passwordKey")
+                .build();
+
+        given(memberRepository.findByPasswordResetKey(anyString()))
+                .willReturn(Optional.of(member));
+
+        // when
+        memberService.resetPassword(resetPasswordDto);
+
+        // then
+        verify(memberRepository, times(1)).save(any(Member.class));
+    }
+
+    @Test
+    @DisplayName("비밀번호 초기화시 초기화 키로 찾은 회원이 존재하지 않을 경우 예외 발생")
+    void testResetPassword_UserNotExistException() {
+        // given
+        MemberRequestDto.ResetPasswordDto resetPasswordDto = MemberRequestDto.ResetPasswordDto
+                .builder()
+                .newPwd("2222")
+                .resetPasswordKey("passwordKey")
+                .build();
+
+        // when
+        when(memberRepository.findByPasswordResetKey(anyString()))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UserNotExistException.class,
+                () -> memberService.resetPassword(resetPasswordDto));
+    }
+
+    @Test
+    @DisplayName("비밀번호 초기화시 초기화 가능시간 필드가 존재하지 않을 경우 예외 발생")
+    void testResetPassword_PasswordResetLimitTimeInvalidException_1() {
+        // given
+        MemberRequestDto.ResetPasswordDto resetPasswordDto = MemberRequestDto.ResetPasswordDto
+                .builder()
+                .newPwd("2222")
+                .resetPasswordKey("resetKey")
+                .build();
+
+        Member member = new Member();
+
+        // when
+        when(memberRepository.findByPasswordResetKey(anyString()))
+                .thenReturn(Optional.of(member));
+
+        // then
+        assertThrows(PasswordResetLimitTimeInvalidException.class,
+                () -> memberService.resetPassword(resetPasswordDto));
+    }
+
+    @Test
+    @DisplayName("비밀번호 초기화시 초기화 키의 유효기간이 지난 경우 예외 발생")
+    void testResetPassword_PasswordResetLimitTimeInvalidException_2() {
+        // given
+        MemberRequestDto.ResetPasswordDto resetPasswordDto = MemberRequestDto.ResetPasswordDto
+                .builder()
+                .newPwd("2222")
+                .resetPasswordKey("resetKey")
+                .build();
+
+        Member member = Member.builder()
+                .passwordResetLimitTime(LocalDateTime.now().minusDays(1))
+                .build();
+
+        // when
+        when(memberRepository.findByPasswordResetKey(anyString()))
+                .thenReturn(Optional.of(member));
+
+        // then
+        assertThrows(PasswordResetLimitTimeInvalidException.class,
+                () -> memberService.resetPassword(resetPasswordDto));
     }
 
     @Test
@@ -197,6 +392,50 @@ class MemberServiceTest {
         verify(memberRepository, times(1))
                 .save(any(Member.class));
     }
-    // TODO : 예외처리 테스트 코드 작성 필요
 
+    @Test
+    @DisplayName("회원탈퇴시 회원이 존재하지 않을 경우 예외 발생")
+    void testWithDraw_UserNotExistException() {
+        // given
+        MemberRequestDto.MemberWithdrawDto withdrawDto = MemberRequestDto.MemberWithdrawDto
+                .builder()
+                .email("user@email.com")
+                .password("1111")
+                .build();
+
+        // when
+        when(memberRepository.findByEmail(anyString()))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UserNotExistException.class,
+                () -> memberService.withdraw(withdrawDto));
+    }
+
+    @Test
+    @DisplayName("회원탈퇴시 입력한 비밀번호가 일치하지 않을 경우 예외 발생")
+    void testWithDraw_PasswordNotMatchException() {
+        // given
+        MemberRequestDto.MemberWithdrawDto withdrawDto = MemberRequestDto.MemberWithdrawDto
+                .builder()
+                .email("user@email.com")
+                .password("2222")
+                .build();
+
+        Member member = Member.builder()
+                .email("user@email.com")
+                .password("1111")
+                .build();
+
+        // when
+        when(memberRepository.findByEmail(anyString()))
+                .thenReturn(Optional.of(member));
+
+        when(passwordEncoder.matches(anyString(), anyString()))
+                .thenReturn(false);
+
+        // then
+        assertThrows(PasswordNotMatchException.class,
+                () -> memberService.withdraw(withdrawDto));
+    }
 }

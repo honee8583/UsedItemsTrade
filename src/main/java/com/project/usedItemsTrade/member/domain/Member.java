@@ -30,7 +30,6 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -72,8 +71,7 @@ public class Member extends BaseEntity {
     }
 
     public void withdraw() {
-        this.password = null;
-        this.phone = null;
+        this.phone = "WITHDRAW";
         this.emailAuthYn = false;
         this.status = MemberStatus.WITHDRAW;
         this.role = null;

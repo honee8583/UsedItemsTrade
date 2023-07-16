@@ -1,0 +1,60 @@
+### 회원가입
+POST http://localhost:8080/member/join
+Content-Type: application/json
+
+{
+  "email": "honee85823@naver.com",
+  "password" : "1111",
+  "phone": "010-1234-5678"
+}
+
+### 비밀번호 초기화 메일 발송
+POST http://localhost:8080/member/pwdResetMail
+Content-Type: application/json
+
+{
+  "email": "honee8583@naver.com",
+  "emailAuthCode": ""
+}
+
+### 회원 정보 조회
+GET http://localhost:8080/member/info?email=honee8583@naver.com
+Accept: application/json
+
+
+### 회원 정보 수정
+POST http://localhost:8080/member/updateInfo
+Content-Type: application/json
+
+{
+  "email": "honee8583@naver.com",
+  "name": "updateUser",
+  "phone": "010-3333-3333"
+}
+
+### 이메일 인증 처리
+POST http://localhost:8080/member/authEmail
+Content-Type: application/json
+
+{
+  "email": "honee8583@naver.com",
+  "emailAuthCode" : "a2effbb6-4d1e-418a-8ab1-80d8e7a5623e"
+}
+
+### 비밀번호 초기화 처리
+POST http://localhost:8080/member/resetPwd
+Content-Type: application/json
+
+{
+  "newPwd": "1111",
+  "resetPasswordKey": "d531139b-84e9-4e3b-b1f2-6160a94893bd"
+}
+
+### 회원 탈퇴 처리
+POST http://localhost:8080/member/withdraw
+Content-Type: application/json
+
+{
+  "email": "honee8583@naver.com",
+  "password": "1111"
+}

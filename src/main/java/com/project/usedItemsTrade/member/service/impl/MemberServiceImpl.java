@@ -1,6 +1,7 @@
 package com.project.usedItemsTrade.member.service.impl;
 
 import com.project.usedItemsTrade.member.domain.*;
+import com.project.usedItemsTrade.member.error.*;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import com.project.usedItemsTrade.member.service.MemberService;
 import com.project.usedItemsTrade.member.utils.MailUtil;
@@ -27,7 +28,7 @@ public class MemberServiceImpl implements MemberService {
         String emailCode = UUID.randomUUID().toString();
 
         if (memberRepository.findByEmail(joinDto.getEmail()).isPresent()) {
-            throw new RuntimeException("User Already exists");  // TODO Custom Exception
+            throw new AlreadyExistMemberException();
         }
 
         Member member = Member.builder()
@@ -44,9 +45,8 @@ public class MemberServiceImpl implements MemberService {
 
         mailUtil.sendMail(
                 member.getEmail(),
-                "회원가입에 성공하였습니다!!",
-                "링크" // TODO : 링크 설정
-        );
+                member.getName() + "님 회원가입에 성공하였습니다!!",
+                "링크");  // TODO LINK
 
         memberRepository.save(member);
     }
@@ -55,7 +55,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void sendPasswordResetMail(String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No such user.."));
+                .orElseThrow(UserNotExistException::new);
 
         String resetKey = UUID.randomUUID().toString();
         member.updatePasswordResetKey(resetKey, LocalDateTime.now().plusDays(1));
@@ -70,7 +70,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public MemberResponseDto.MemberInfoDto myInfo(String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No such user.."));
+                .orElseThrow(UserNotExistException::new);
 
         return MemberResponseDto.MemberInfoDto.memberToInfoDto(member);
     }
@@ -79,7 +79,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void updateMyInfo(MemberRequestDto.MemberUpdateInfoDto updateInfoDto) {
         Member member = memberRepository.findByEmail(updateInfoDto.getEmail())
-                        .orElseThrow(() -> new RuntimeException("No such user..."));
+                        .orElseThrow(UserNotExistException::new);
 
         member.updateMemberInfo(updateInfoDto);
 
@@ -90,10 +90,10 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void emailAuth(String emailAuthCode) {
         Member member = memberRepository.findByEmailCode(emailAuthCode)
-                .orElseThrow(() -> new RuntimeException("No Such EmailCode exists..."));
+                .orElseThrow(UserNotExistException::new);
 
         if (member.isEmailAuthYn()) {
-            throw new RuntimeException("Already Email Authenticated!!");   // TODO Custom Exception
+            throw new AlreadyEmailAuthenticatedException();
         }
 
         member.updateEmailAuth();
@@ -105,14 +105,11 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void resetPassword(MemberRequestDto.ResetPasswordDto resetPasswordDto) {
         Member member = memberRepository.findByPasswordResetKey(resetPasswordDto.getResetPasswordKey())
-                .orElseThrow(() -> new RuntimeException("Wrong passwordKey!!"));
+                .orElseThrow(UserNotExistException::new);
 
-        if (member.getPasswordResetLimitTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("비밀번호 초기화 유효시간이 지났습니다!");
-        }
-
-        if (member.getPasswordResetLimitTime() == null) {
-            throw new RuntimeException("비밀번호 초기화 유효시간이 존재하지 않습니다!");
+        if (member.getPasswordResetLimitTime() == null
+                || member.getPasswordResetLimitTime().isBefore(LocalDateTime.now())) {
+            throw new PasswordResetLimitTimeInvalidException();
         }
 
         String newEncodedPwd = passwordEncoder.encode(resetPasswordDto.getNewPwd());
@@ -124,10 +121,10 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void withdraw(MemberRequestDto.MemberWithdrawDto withdrawDto) {
         Member member = memberRepository.findByEmail(withdrawDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("No Such User..."));    // TODO Custom Exception
+                .orElseThrow(UserNotExistException::new);
 
-        if (!passwordEncoder.matches(member.getPassword(), withdrawDto.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다!"); // TODO Custom Exception
+        if (!passwordEncoder.matches(withdrawDto.getPassword(), member.getPassword())) {
+            throw new PasswordNotMatchException();
         }
 
         member.withdraw();
