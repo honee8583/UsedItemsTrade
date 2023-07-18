@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RestController
 @RequestMapping("/member")
@@ -18,7 +20,7 @@ public class MemberController {
 
     @PostMapping("/join")
     @ApiOperation(value = "일반회원가입", notes = "소셜로그인이 아닌 일반 회원가입입니다")
-    public ResponseEntity<?> join(@RequestBody MemberRequestDto.MemberJoinDto joinDto) {
+    public ResponseEntity<?> join(@Valid @RequestBody MemberRequestDto.MemberJoinDto joinDto) {
         memberService.join(joinDto);
 
         return ResponseEntity.ok().body(true);
@@ -26,7 +28,7 @@ public class MemberController {
 
     @PostMapping("/pwdResetMail")
     @ApiOperation(value = "비밀번호 초기화 코드 발송", notes = "비밀번호 초기화 코드를 메일로 발송합니다")
-    public ResponseEntity<?> sendPasswordResetMail(@RequestBody MemberRequestDto.EmailDto emailDto) {
+    public ResponseEntity<?> sendPasswordResetMail(@Valid @RequestBody MemberRequestDto.EmailDto emailDto) {
         memberService.sendPasswordResetMail(emailDto.getEmail());
 
         return ResponseEntity.ok().body(true);
@@ -43,7 +45,7 @@ public class MemberController {
 
     @PostMapping("/updateInfo")
     @ApiOperation(value = "회원정보 수정", notes = "회원정보를 업데이트 합니다")
-    public ResponseEntity<?> updateMyInformation(@RequestBody MemberRequestDto.MemberUpdateInfoDto updateInfoDto) {
+    public ResponseEntity<?> updateMyInformation(@Valid @RequestBody MemberRequestDto.MemberUpdateInfoDto updateInfoDto) {
         memberService.updateMyInfo(updateInfoDto);
 
         return ResponseEntity.ok().body(true);
@@ -51,7 +53,7 @@ public class MemberController {
 
     @PostMapping("/authEmail")
     @ApiOperation(value = "회원가입 이메일 인증", notes = "이메일 인증을 진행합니다")
-    public ResponseEntity<?> authenticateEmail(@RequestBody MemberRequestDto.EmailDto emailDto) {
+    public ResponseEntity<?> authenticateEmail(@Valid @RequestBody MemberRequestDto.EmailDto emailDto) {
         memberService.emailAuth(emailDto.getEmailAuthCode());
 
         return ResponseEntity.ok().body(true);
@@ -59,7 +61,7 @@ public class MemberController {
 
     @PostMapping("/resetPwd")
     @ApiOperation(value = "비밀번호 초기화", notes = "비밀번호 초기화 코드를 받고 초기화합니다")
-    public ResponseEntity<?> resetPassword(@RequestBody MemberRequestDto.ResetPasswordDto resetPasswordDto) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody MemberRequestDto.ResetPasswordDto resetPasswordDto) {
         memberService.resetPassword(resetPasswordDto);
 
         return ResponseEntity.ok().body(true);
@@ -67,7 +69,7 @@ public class MemberController {
 
     @PostMapping("/withdraw")
     @ApiOperation(value = "회원탈퇴", notes = "회원상태를 탈퇴로 변경하고 개인정보를 삭제후 탈퇴를 진행합니다")
-    public ResponseEntity<?> withdrawMember(@RequestBody MemberRequestDto.MemberWithdrawDto withdrawDto) {
+    public ResponseEntity<?> withdrawMember(@Valid @RequestBody MemberRequestDto.MemberWithdrawDto withdrawDto) {
         memberService.withdraw(withdrawDto);
 
         return ResponseEntity.ok().body(true);

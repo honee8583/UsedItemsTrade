@@ -1,16 +1,23 @@
 package com.project.usedItemsTrade.member.error;
 
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @ToString
 public class ErrorResponse {
-    private int code;   // 예외 에러 코드
-    private String message;     // 예외 에러 메시지
+    private int code;
+    private List<String> messages;
+
+    public ErrorResponse(int code, List<String> messages) {
+        this.code = code;
+        this.messages = messages;
+    }
 }

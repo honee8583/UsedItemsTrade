@@ -1,13 +1,12 @@
 package com.project.usedItemsTrade.member.service;
 
 import com.project.usedItemsTrade.member.domain.*;
-import com.project.usedItemsTrade.member.error.*;
+import com.project.usedItemsTrade.member.error.exception.*;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import com.project.usedItemsTrade.member.service.impl.MemberServiceImpl;
 import com.project.usedItemsTrade.member.utils.MailUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperties;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -438,4 +437,7 @@ class MemberServiceTest {
         assertThrows(PasswordNotMatchException.class,
                 () -> memberService.withdraw(withdrawDto));
     }
+
+    // TODO 유효성검사 예외 발생 테스트
+
 }

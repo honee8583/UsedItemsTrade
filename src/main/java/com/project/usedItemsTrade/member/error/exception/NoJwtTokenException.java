@@ -1,9 +1,8 @@
-
-package com.project.usedItemsTrade.member.error;
+package com.project.usedItemsTrade.member.error.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class PasswordNotMatchException extends AbstractException {
+public class NoJwtTokenException extends AbstractException {
 
     @Override
     public int getStatusCode() {
@@ -12,6 +11,6 @@ public class PasswordNotMatchException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "비밀번호가 일치하지 않습니다";
+        return "Jwt 토큰이 전달되지 않았습니다!";
     }
 }

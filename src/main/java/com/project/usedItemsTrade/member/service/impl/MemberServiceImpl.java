@@ -1,7 +1,7 @@
 package com.project.usedItemsTrade.member.service.impl;
 
 import com.project.usedItemsTrade.member.domain.*;
-import com.project.usedItemsTrade.member.error.*;
+import com.project.usedItemsTrade.member.error.exception.*;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import com.project.usedItemsTrade.member.service.MemberService;
 import com.project.usedItemsTrade.member.utils.MailUtil;

@@ -1,8 +1,8 @@
-package com.project.usedItemsTrade.member.error;
+package com.project.usedItemsTrade.member.error.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class AlreadyExistMemberException extends AbstractException {
+public class AlreadyEmailAuthenticatedException extends AbstractException{
 
     @Override
     public int getStatusCode() {
@@ -11,6 +11,6 @@ public class AlreadyExistMemberException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "이미 존재하는 회원입니다";
+        return "이미 이메일 인증을 한 회원입니다";
     }
 }

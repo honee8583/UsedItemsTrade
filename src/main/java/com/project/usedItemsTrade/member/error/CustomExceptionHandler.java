@@ -1,29 +1,36 @@
 package com.project.usedItemsTrade.member.error;
 
+import com.project.usedItemsTrade.member.error.exception.AbstractException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.mail.SendFailedException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
+    // 커스텀 예외클래스 처리
     @ExceptionHandler(AbstractException.class)
     protected ResponseEntity<ErrorResponse> handlerCustomException(AbstractException e) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .code(e.getStatusCode())
-                .message(e.getMessage())
-                .build();
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                Arrays.asList(e.getMessage()));
 
         return new ResponseEntity<>(errorResponse, HttpStatus.resolve(e.getStatusCode()));
     }
 
+    // 엔티티의 유효성 검사 예외
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<ErrorResponse> validationException(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
@@ -36,7 +43,7 @@ public class CustomExceptionHandler {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code(HttpStatus.BAD_REQUEST.value())
-                .message(errorMessage.toString())
+                .messages(Arrays.asList(errorMessage.toString()))
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -46,7 +53,35 @@ public class CustomExceptionHandler {
     protected ResponseEntity<ErrorResponse> illegalException(IllegalArgumentException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage())
+                .messages(Arrays.asList(e.getMessage()))
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    // 입력데이터의 유효성 검사 예외
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+        List<String> errorMessages = new ArrayList<>();
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            String errorMessage = fieldError.getDefaultMessage();
+            errorMessages.add(errorMessage);
+        }
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .messages(errorMessages)
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    // 이메일 전송 예외
+    @ExceptionHandler(SendFailedException.class)
+    protected ResponseEntity<ErrorResponse> sendFailedException(SendFailedException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .messages(Arrays.asList(e.getMessage()))
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);

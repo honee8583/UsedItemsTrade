@@ -1,4 +1,4 @@
-package com.project.usedItemsTrade.member.error;
+package com.project.usedItemsTrade.member.error.exception;
 
 public abstract class AbstractException extends RuntimeException {
     abstract public int getStatusCode();

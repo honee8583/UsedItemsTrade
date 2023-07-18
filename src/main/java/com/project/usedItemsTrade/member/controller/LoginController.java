@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RestController
 @RequestMapping("/login")
@@ -31,7 +33,7 @@ public class LoginController {
     // 일반로그인
     @ApiOperation(value = "일반로그인", notes = "normalLogin")
     @PostMapping("/login")
-    public ResponseEntity<JwtToken> normalLogin(@RequestBody MemberRequestDto.NormalMemberLoginDto loginDto) {
+    public ResponseEntity<JwtToken> normalLogin(@Valid @RequestBody MemberRequestDto.NormalMemberLoginDto loginDto) {
         JwtToken tokens = loginService.normalLogin(loginDto);
 
         return ResponseEntity.ok(tokens);
