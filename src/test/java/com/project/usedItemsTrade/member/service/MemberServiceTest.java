@@ -74,7 +74,6 @@ class MemberServiceTest {
         verify(memberRepository).save(memberCaptor.capture());
 
         Member savedMember = memberCaptor.getValue();
-        System.out.println(savedMember);
         assertEquals(savedMember.getEmail(), joinDto.getEmail());
         assertEquals(savedMember.getName(), joinDto.getName());
         assertEquals(savedMember.getPhone(), joinDto.getPhone());
