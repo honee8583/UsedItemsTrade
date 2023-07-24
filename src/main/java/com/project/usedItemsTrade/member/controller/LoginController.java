@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +23,8 @@ public class LoginController {
     private final LoginService loginService;
 
     // 카카오로그인
-    @ApiOperation(value = "카카오로그인", notes = "kakaoLogin")
     @PostMapping("/kakaoLogin")
+    @ApiOperation(value = "카카오로그인", notes = "kakaoLogin")
     public ResponseEntity<JwtToken> kakaoLogin(@RequestBody MemberRequestDto.KakaoMemberLoginDto loginDto) throws Exception {
         JwtToken tokens = loginService.kakaoLogin(loginDto);
 
@@ -31,8 +32,8 @@ public class LoginController {
     }
 
     // 일반로그인
+    @PostMapping("/normal")
     @ApiOperation(value = "일반로그인", notes = "normalLogin")
-    @PostMapping("/login")
     public ResponseEntity<JwtToken> normalLogin(@Valid @RequestBody MemberRequestDto.NormalMemberLoginDto loginDto) {
         JwtToken tokens = loginService.normalLogin(loginDto);
 
@@ -40,8 +41,9 @@ public class LoginController {
     }
 
     // JWT 토큰 갱신
-    @ApiOperation(value = "JWT토큰 재발급", notes = "Refresh Jwt Tokens")
     @PostMapping("/refresh")
+    @PreAuthorize("hasRole('USER')")
+    @ApiOperation(value = "JWT토큰 재발급", notes = "Refresh Jwt Tokens")
     public ResponseEntity<JwtToken> refreshToken(@RequestBody JwtToken refreshToken) {
         log.info(refreshToken.toString());
 

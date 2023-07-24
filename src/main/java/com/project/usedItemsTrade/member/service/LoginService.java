@@ -100,8 +100,8 @@ public class LoginService {
             throw new RuntimeException("Password doesn't match!");  // TODO 커스텀 예외 처리
         }
 
-        List<SimpleGrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+        List<SimpleGrantedAuthority> roles =
+                Arrays.asList(new SimpleGrantedAuthority("ROLE_" + member.getRole()));
 
         String jwt = TOKEN_PREFIX + tokenProvider.generateToken(loginDTO.getEmail(), roles, TOKEN_EXPIRE_TIME);
         String refreshJwt = TOKEN_PREFIX + tokenProvider.generateToken(loginDTO.getEmail(),
@@ -127,7 +127,6 @@ public class LoginService {
 
         String username = tokenProvider.getUsername(refreshToken);
         List<SimpleGrantedAuthority> roles = tokenProvider.getRoles(refreshToken);
-
 
         String newJwt = TOKEN_PREFIX + tokenProvider.generateToken(username, roles, TOKEN_EXPIRE_TIME);
         String newRefreshJwt = TOKEN_PREFIX + tokenProvider.generateToken(username, roles, REFRESH_TOKEN_EXPIRE_TIME);

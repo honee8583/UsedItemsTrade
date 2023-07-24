@@ -27,6 +27,8 @@ public class CustomExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
                 Arrays.asList(e.getMessage()));
 
+        log.warn(errorResponse.toString());
+
         return new ResponseEntity<>(errorResponse, HttpStatus.resolve(e.getStatusCode()));
     }
 
@@ -46,6 +48,8 @@ public class CustomExceptionHandler {
                 .messages(Arrays.asList(errorMessage.toString()))
                 .build();
 
+        log.warn(errorResponse.toString());
+
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -55,6 +59,8 @@ public class CustomExceptionHandler {
                 .code(HttpStatus.BAD_REQUEST.value())
                 .messages(Arrays.asList(e.getMessage()))
                 .build();
+
+        log.warn(errorResponse.toString());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -73,6 +79,8 @@ public class CustomExceptionHandler {
                 .messages(errorMessages)
                 .build();
 
+        log.warn(errorResponse.toString());
+
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -83,6 +91,8 @@ public class CustomExceptionHandler {
                 .code(HttpStatus.BAD_REQUEST.value())
                 .messages(Arrays.asList(e.getMessage()))
                 .build();
+
+        log.warn(errorResponse.toString());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
