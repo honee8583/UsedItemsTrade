@@ -4,6 +4,7 @@ import com.project.usedItemsTrade.member.error.exception.AbstractException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +21,16 @@ import java.util.Set;
 @Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    protected ResponseEntity<ErrorResponse> usernameNotFoundExceptionHandler(UsernameNotFoundException e) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                Arrays.asList(e.getMessage()));
+
+        log.warn(errorResponse.toString());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
     // 커스텀 예외클래스 처리
     @ExceptionHandler(AbstractException.class)
