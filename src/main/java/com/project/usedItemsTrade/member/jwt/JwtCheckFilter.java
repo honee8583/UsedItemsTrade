@@ -1,5 +1,6 @@
 package com.project.usedItemsTrade.member.jwt;
 
+import com.project.usedItemsTrade.member.error.exception.JwtTokenNotValidException;
 import com.project.usedItemsTrade.member.error.exception.NoJwtTokenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +43,10 @@ public class JwtCheckFilter extends OncePerRequestFilter {
             log.info(String.format("[%s] -> %s", jwtTokenProvider.getUsername(token), request.getRequestURI()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else {
+        } else if (!StringUtils.hasText(token)){
             throw new NoJwtTokenException();
+        } else {
+            throw new JwtTokenNotValidException();
         }
 
         filterChain.doFilter(request, response);
