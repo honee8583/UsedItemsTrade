@@ -1,5 +1,6 @@
 package com.project.usedItemsTrade.member.service.impl;
 
+import com.project.usedItemsTrade.board.repository.BoardRepository;
 import com.project.usedItemsTrade.member.domain.*;
 import com.project.usedItemsTrade.member.error.exception.*;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
+    private final BoardRepository boardRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailUtil mailUtil;
 
@@ -129,5 +131,8 @@ public class MemberServiceImpl implements MemberService {
 
         member.withdraw();
         memberRepository.save(member);
+
+        // TODO 회원 탈퇴시 회원의 게시글 삭제 - 테스트케이스 작성
+        boardRepository.deleteAllByMember(member);
     }
 }
