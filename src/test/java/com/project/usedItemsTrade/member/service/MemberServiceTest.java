@@ -1,5 +1,6 @@
 package com.project.usedItemsTrade.member.service;
 
+import com.project.usedItemsTrade.board.repository.BoardRepository;
 import com.project.usedItemsTrade.member.domain.*;
 import com.project.usedItemsTrade.member.error.exception.*;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
@@ -27,6 +28,9 @@ class MemberServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private BoardRepository boardRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -389,6 +393,8 @@ class MemberServiceTest {
         // then
         verify(memberRepository, times(1))
                 .save(any(Member.class));
+        verify(boardRepository, times(1))
+                .deleteAllByMember(any(Member.class));
     }
 
     @Test

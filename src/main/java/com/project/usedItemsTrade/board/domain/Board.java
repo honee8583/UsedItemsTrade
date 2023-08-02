@@ -2,9 +2,12 @@ package com.project.usedItemsTrade.board.domain;
 
 import com.project.usedItemsTrade.member.domain.BaseEntity;
 import com.project.usedItemsTrade.member.domain.Member;
+import com.project.usedItemsTrade.reply.domain.Reply;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
@@ -28,16 +31,15 @@ public class Board extends BaseEntity {
 
 //    private String keyword;
 
-    // TODO Reply 연관관계 설정(cascadeType.ALL)
-//    reply
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reply> replyList = new ArrayList<>();
 
     private int view;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    // 조회수 증가
-
+    // TODO 조회수 증가
 
     public void update(BoardRequestDto.BoardUpdateDto updateDto) {
         this.title = updateDto.getTitle();

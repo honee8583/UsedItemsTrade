@@ -2,6 +2,8 @@ package com.project.usedItemsTrade.board.domain;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +19,9 @@ public class BoardDto {
     private int view;
     private String email;
 
+    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
+
     public static BoardDto entityToDto(Board board) {
         return BoardDto.builder()
                 .id(board.getId())
@@ -26,6 +31,8 @@ public class BoardDto {
                 .boardStatus(board.getBoardStatus())
                 .view(board.getView())
                 .email(board.getMember().getEmail())
+                .createdDate(board.getCreatedDate())
+                .modifiedDate(board.getModifiedDate())
                 .build();
     }
 }

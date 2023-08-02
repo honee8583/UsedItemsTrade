@@ -130,9 +130,9 @@ public class MemberServiceImpl implements MemberService {
         }
 
         member.withdraw();
+        log.info(member.toString());
         memberRepository.save(member);
 
-        // TODO 회원 탈퇴시 회원의 게시글 삭제 - 테스트케이스 작성
         boardRepository.deleteAllByMember(member);
     }
 }

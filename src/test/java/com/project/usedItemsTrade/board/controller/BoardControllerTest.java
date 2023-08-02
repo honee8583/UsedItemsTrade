@@ -36,7 +36,7 @@ class BoardControllerTest {
     @MockBean
     private BoardServiceImpl boardService;
 
-    private static final String jwt = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0QGVtYWlsLmNvbSIsInJvbGVzIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTY5MDI2ODAxOCwiZXhwIjoxNjkwMjcxNjE4fQ.T-dGnATvixLFm2kCqUCIAqUrpF7praEhFeLurYaX7iwBK5fSwiGBAdwBvvlEGbLLE0b6G71KGdTvUxtFRB5enA";
+    private static final String jwt = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyQGVtYWlsLmNvbSIsInJvbGVzIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTY5MDk1MTg2MiwiZXhwIjoxNjkwOTU1NDYyfQ.f6kdSrOL7xdxna96dq0Am5c77MJcS3a6ebZEkip00NAdtGXiyxaT7xrS7CIvDaSv2VKPzZ4i852ThLvfoBI6iw";
 
     @Test
     @DisplayName("registerBoard 컨트롤러 메소드 테스트")
