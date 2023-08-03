@@ -18,8 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -75,7 +74,7 @@ class BoardControllerTest {
                         .build();
 
         // when
-        when(boardService.get(anyLong())).thenReturn(boardDto);
+        when(boardService.get(anyLong(), anyString())).thenReturn(boardDto);
 
         // then
         mockMvc.perform(get("/board/get/1")

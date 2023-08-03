@@ -4,6 +4,7 @@ import com.project.usedItemsTrade.board.domain.*;
 import com.project.usedItemsTrade.board.error.NoBoardExistsException;
 import com.project.usedItemsTrade.board.error.UserNotMatchException;
 import com.project.usedItemsTrade.board.repository.BoardRepository;
+import com.project.usedItemsTrade.board.repository.BoardViewHistoryRepository;
 import com.project.usedItemsTrade.board.service.BoardService;
 import com.project.usedItemsTrade.member.domain.Member;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
@@ -18,8 +19,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final BoardViewHistoryRepository boardViewHistoryRepository;
 
     @Override
     @Transactional
@@ -42,9 +46,36 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional(readOnly = true)
-    public BoardDto get(Long id) {
+    public BoardDto get(Long id, String email) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(NoBoardExistsException::new);
+
+        Optional<BoardViewHistory> viewHistory =
+                boardViewHistoryRepository.findByBoardAndUserEmail(board, email);
+
+        // 아직 방문한적이 없다면
+        if (viewHistory.isEmpty()) {
+            BoardViewHistory history = BoardViewHistory.builder()
+                    .board(board)
+                    .userEmail(email)
+                    .viewTime(LocalDateTime.now())
+                    .build();
+
+            boardViewHistoryRepository.save(history);
+        } else {
+            // 방문한적이 있을 경우
+            BoardViewHistory history = viewHistory.get();
+            if (LocalDateTime.now().isBefore(history.getViewTime().plusDays(1))) {
+                // 조회수 증가
+                board.increaseView();
+                history.updateViewTime();
+
+                boardViewHistoryRepository.save(history);
+                boardRepository.save(board);
+
+                log.info(board.getId() + "번 게시물의 조회수를 증가시킵니다");
+            }
+        }
 
         return BoardDto.entityToDto(board);
     }

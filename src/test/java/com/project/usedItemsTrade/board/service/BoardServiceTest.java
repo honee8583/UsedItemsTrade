@@ -1,7 +1,10 @@
 package com.project.usedItemsTrade.board.service;
 
 import com.project.usedItemsTrade.board.domain.*;
+import com.project.usedItemsTrade.board.error.NoBoardExistsException;
+import com.project.usedItemsTrade.board.error.UserNotMatchException;
 import com.project.usedItemsTrade.board.repository.BoardRepository;
+import com.project.usedItemsTrade.board.repository.BoardViewHistoryRepository;
 import com.project.usedItemsTrade.board.service.impl.BoardServiceImpl;
 import com.project.usedItemsTrade.member.domain.Member;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
@@ -15,8 +18,10 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +37,9 @@ class BoardServiceTest {
 
     @Mock
     private BoardRepository boardRepository;
+
+    @Mock
+    private BoardViewHistoryRepository viewHistoryRepository;
 
     @Mock
     private MemberRepository memberRepository;
@@ -104,6 +112,24 @@ class BoardServiceTest {
     }
 
     @Test
+    @DisplayName("Board 업로드시 존재하지 않는 작성자일 경우 예외 발생 테스트")
+    void testRegister_UsernameNotFoundException() {
+        // given
+        BoardRequestDto.BoardRegisterDto registerDto =
+                BoardRequestDto.BoardRegisterDto
+                        .builder()
+                        .build();
+
+        // when
+        when(memberRepository.findByEmail(anyString()))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(UsernameNotFoundException.class,
+                () -> boardService.register(registerDto, "user@email.com"));
+    }
+
+    @Test
     @DisplayName("Board 조회 테스트")
     void testGet() {
         // given
@@ -117,10 +143,19 @@ class BoardServiceTest {
                 .price(1000)
                 .build();
 
+        BoardViewHistory viewHistory = BoardViewHistory.builder()
+                .id(1L)
+                .board(board)
+                .userEmail("user@email.com")
+                .viewTime(LocalDateTime.now())
+                .build();
+
         given(boardRepository.findById(anyLong())).willReturn(Optional.of(board));
+        given(viewHistoryRepository.findByBoardAndUserEmail(board, "user@email.com"))
+                .willReturn(Optional.of(viewHistory));
 
         // when
-        BoardDto boardDto = boardService.get(id);
+        BoardDto boardDto = boardService.get(id, "user@email.com");
 
         // then
         assertEquals(id, boardDto.getId());
@@ -129,6 +164,22 @@ class BoardServiceTest {
         assertEquals("user@email.com", boardDto.getEmail());
         assertEquals(BoardStatus.SELL, boardDto.getBoardStatus());
         assertEquals(1000, boardDto.getPrice());
+    }
+
+    @Test
+    @DisplayName("Board 조회시 존재하지 않는 글일 경우 예외 발생 테스트")
+    void testGet_NoBoardExistsException() {
+        // given
+        Long id = 1L;
+        String email = "user@email.com";
+
+        // when
+        when(boardRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(NoBoardExistsException.class,
+                () -> boardService.get(id, email));
     }
 
     @Test
@@ -172,7 +223,47 @@ class BoardServiceTest {
         assertEquals(updateDto.getBoardStatus(), updatedBoard.getBoardStatus());
     }
 
-    // TODO 댓글 삭제 cascade 테스트
+    @Test
+    @DisplayName("Board 수정시 수정할 글이 존재하지 않을 경우 예외 발생 테스트")
+    void testUpdateBoard_NoBoardExistsException() {
+        // given
+        BoardRequestDto.BoardUpdateDto updateDto = BoardRequestDto.BoardUpdateDto
+                .builder()
+                .build();
+
+        // when
+        when(boardRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(NoBoardExistsException.class,
+                () -> boardService.updateBoard(updateDto, "user@email.com"));
+    }
+
+    @Test
+    @DisplayName("Board 수정시 작성자 정보가 일치하지 않을 경우 예외 발생 테스트")
+    void testUpdateBoard_UserNotMatchException() {
+        // given
+        Board board = Board.builder()
+                .id(1L)
+                .member(Member.builder().email("user@email.com").build())
+                .build();
+
+        BoardRequestDto.BoardUpdateDto updateDto =
+                BoardRequestDto.BoardUpdateDto
+                                .builder()
+                                .id(1L)
+                                .build();
+
+        // when
+        when(boardRepository.findById(anyLong()))
+                .thenReturn(Optional.of(board));
+
+        // then
+        assertThrows(UserNotMatchException.class,
+                () -> boardService.updateBoard(updateDto, "user2@email.com"));
+
+    }
 
     @Test
     @DisplayName("Board 삭제 테스트")
@@ -192,6 +283,41 @@ class BoardServiceTest {
 
         // then
         verify(boardRepository, times(1)).delete(any(Board.class));
+    }
+
+    @Test
+    @DisplayName("Board 삭제시 존재하지 않는 게시글일 경우 예외 발생 테스트")
+    void testDeleteBoard_NoBoardExistsException() {
+        // given
+        Long id = 1L;
+        String email = "user@email.com";
+
+        // when
+        when(boardRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        // then
+        assertThrows(NoBoardExistsException.class,
+                () -> boardService.deleteBoard(id, email));
+    }
+
+    @Test
+    void testDeleteBoard_UserNotMatchException() {
+        // given
+        Long id = 1L;
+        String email = "user2@email.com";
+
+        Board board = Board.builder()
+                .member(Member.builder().email("user@email.com").build())
+                .build();
+
+        // when
+        when(boardRepository.findById(anyLong()))
+                .thenReturn(Optional.of(board));
+
+        // then
+        assertThrows(UserNotMatchException.class,
+                () -> boardService.deleteBoard(id, email));
     }
 
     @Test
@@ -216,6 +342,4 @@ class BoardServiceTest {
         // then
         assertEquals(3, result.size());
     }
-
-    // TODO 예외 발생 테스트
 }

@@ -42,7 +42,9 @@ public class Board extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    // TODO 조회수 증가
+    public void increaseView() {
+        this.view++;
+    }
 
     public void update(BoardRequestDto.BoardUpdateDto updateDto) {
         this.title = updateDto.getTitle();
@@ -52,10 +54,13 @@ public class Board extends BaseEntity {
     }
 
     public static Board dtoToBoard(BoardRequestDto.BoardRegisterDto registerDto, String email) {
-        List<Keyword> keywordList = registerDto.getKeywordIds()
-                .stream()
-                .map(id -> Keyword.builder().id(id).build())
-                .collect(Collectors.toList());
+        List<Keyword> keywordList = new ArrayList<>();
+        if (registerDto.getKeywordIds() != null) {
+            keywordList = registerDto.getKeywordIds()
+                    .stream()
+                    .map(id -> Keyword.builder().id(id).build())
+                    .collect(Collectors.toList());
+        }
 
         return Board.builder()
                 .title(registerDto.getTitle())

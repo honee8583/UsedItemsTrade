@@ -28,8 +28,8 @@ public class BoardController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<BoardDto> getBoard(@PathVariable("id") Long id) {
-        BoardDto boardDto = boardService.get(id);
+    public ResponseEntity<BoardDto> getBoard(@PathVariable("id") Long id, Principal principal) {
+        BoardDto boardDto = boardService.get(id, principal.getName());
 
         return ResponseEntity.ok().body(boardDto);
     }
