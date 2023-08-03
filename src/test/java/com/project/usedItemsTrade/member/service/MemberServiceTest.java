@@ -100,7 +100,7 @@ class MemberServiceTest {
                 .thenReturn(Optional.of(new Member()));
 
         // then
-        assertThrows(AlreadyExistMemberException.class,
+        assertThrows(MemberAlreadyExistsException.class,
                 () -> memberService.join(joinDto));
     }
 

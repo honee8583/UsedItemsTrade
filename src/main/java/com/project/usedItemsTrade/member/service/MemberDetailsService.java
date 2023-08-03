@@ -22,15 +22,13 @@ public class MemberDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("username: " + username);
-
         Member member = memberRepository.findByEmail(username)
                         .orElseThrow(() -> new UsernameNotFoundException("No Such User.."));
 
         MemberDto memberDto = new MemberDto(member.getEmail(), member.getPassword(), false, member.getName(),
                 Arrays.asList(member.getRole()).stream().map((role) -> new SimpleGrantedAuthority("ROLE_" + role)).collect(Collectors.toList()));
 
-        log.info("MemberDto : " + memberDto);
+        log.info("로그인 유저 정보 : " + memberDto);
 
         return memberDto;
     }

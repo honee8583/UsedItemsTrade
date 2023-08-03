@@ -2,7 +2,7 @@ package com.project.usedItemsTrade.member.error.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class AlreadyExistMemberException extends AbstractException {
+public class MemberAlreadyExistsException extends AbstractException {
 
     @Override
     public int getStatusCode() {

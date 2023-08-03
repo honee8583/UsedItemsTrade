@@ -30,7 +30,7 @@ public class MemberServiceImpl implements MemberService {
         String emailCode = UUID.randomUUID().toString();
 
         if (memberRepository.findByEmail(joinDto.getEmail()).isPresent()) {
-            throw new AlreadyExistMemberException();
+            throw new MemberAlreadyExistsException();
         }
 
         Member member = Member.builder()
