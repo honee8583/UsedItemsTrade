@@ -1,5 +1,6 @@
 package com.project.usedItemsTrade.board.domain;
 
+import com.project.usedItemsTrade.keyword.domain.Keyword;
 import com.project.usedItemsTrade.member.domain.BaseEntity;
 import com.project.usedItemsTrade.member.domain.Member;
 import com.project.usedItemsTrade.reply.domain.Reply;
@@ -8,6 +9,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -26,15 +28,16 @@ public class Board extends BaseEntity {
 
     private int price;
 
+    private int view;
+
     @Enumerated(EnumType.STRING)
     private BoardStatus boardStatus;
 
-//    private String keyword;
+    @OneToMany
+    private List<Keyword> keywordList = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> replyList = new ArrayList<>();
-
-    private int view;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
@@ -49,12 +52,18 @@ public class Board extends BaseEntity {
     }
 
     public static Board dtoToBoard(BoardRequestDto.BoardRegisterDto registerDto, String email) {
+        List<Keyword> keywordList = registerDto.getKeywordIds()
+                .stream()
+                .map(id -> Keyword.builder().id(id).build())
+                .collect(Collectors.toList());
+
         return Board.builder()
                 .title(registerDto.getTitle())
                 .content(registerDto.getContent())
                 .price(registerDto.getPrice())
                 .boardStatus(registerDto.getBoardStatus())
                 .member(Member.builder().email(email).build())
+                .keywordList(keywordList)
                 .build();
     }
 }
