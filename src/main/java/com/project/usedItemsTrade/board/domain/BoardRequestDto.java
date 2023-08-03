@@ -1,6 +1,10 @@
 package com.project.usedItemsTrade.board.domain;
 
+import com.project.usedItemsTrade.keyword.domain.KeywordDto;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BoardRequestDto {
 
@@ -15,6 +19,7 @@ public class BoardRequestDto {
         private String content;
         private int price;
         private BoardStatus boardStatus;
+        private List<Long> keywordIds = new ArrayList<>();
     }
 
     @Getter

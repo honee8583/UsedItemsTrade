@@ -23,4 +23,5 @@ public interface BoardService {
     void deleteBoard(Long id, String email);
     // 게시물 검색(제목, 내용, 가격정렬)
     List<BoardDto> searchBoard(BoardRequestDto.BoardSearchDto searchDto);
+    // TODO 키워드를 이용한 검색
 }

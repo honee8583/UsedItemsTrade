@@ -35,7 +35,7 @@ public class BoardServiceImpl implements BoardService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("작성자가 존재하지 않습니다!"));
 
-        Board board = Board.dtoToBoard(registerDto, email);
+        Board board = Board.dtoToBoard(registerDto, member.getEmail());
 
         boardRepository.save(board);
     }
@@ -74,7 +74,7 @@ public class BoardServiceImpl implements BoardService {
             throw new UserNotMatchException();
         }
 
-        boardRepository.delete(board);  // TODO 댓글 삭제 cascade
+        boardRepository.delete(board);
     }
 
     @Override
