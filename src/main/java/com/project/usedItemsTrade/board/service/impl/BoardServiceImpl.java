@@ -45,7 +45,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BoardDto get(Long id, String email) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(NoBoardExistsException::new);
@@ -65,7 +64,7 @@ public class BoardServiceImpl implements BoardService {
         } else {
             // 방문한적이 있을 경우
             BoardViewHistory history = viewHistory.get();
-            if (LocalDateTime.now().isBefore(history.getViewTime().plusDays(1))) {
+            if (LocalDateTime.now().isAfter(history.getViewTime().plusDays(1))) {
                 // 조회수 증가
                 board.increaseView();
                 history.updateViewTime();
