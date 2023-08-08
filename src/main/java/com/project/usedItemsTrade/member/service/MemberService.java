@@ -17,7 +17,7 @@ public interface MemberService {
     void updateMyInfo(MemberRequestDto.MemberUpdateInfoDto updateInfoDto);
 
     // 회원가입 이메일 인증
-    void emailAuth(String emailAuthCode);
+    void emailAuth(MemberRequestDto.EmailDto emailDto);
 
     // 비밀번호 초기화 이메일 인증
     void resetPassword(MemberRequestDto.ResetPasswordDto resetPasswordDto);

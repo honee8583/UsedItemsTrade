@@ -168,7 +168,6 @@ class MemberServiceTest {
 
         // then
         assertThrows(UserNotExistException.class, () -> memberService.myInfo(email));
-
     }
 
     @Test
@@ -224,12 +223,18 @@ class MemberServiceTest {
     void testEmailAuth() {
         // given
         Member member = createMember();
+        MemberRequestDto.EmailDto emailDto = MemberRequestDto.EmailDto.builder()
+                .email("user@email.com")
+                .emailAuthCode("1111")
+                .build();
+
         String emailCode = "1111";
 
-        given(memberRepository.findByEmailCode(anyString())).willReturn(Optional.of(member));
+        given(memberRepository.findByEmailAndEmailCode(anyString(), anyString()))
+                .willReturn(Optional.of(member));
 
         // when
-        memberService.emailAuth(emailCode);
+        memberService.emailAuth(emailDto);
 
         // then
         verify(memberRepository, times(1)).save(any(Member.class));
@@ -246,20 +251,27 @@ class MemberServiceTest {
     void testEmailAuth_UserNotExistException() {
         // given
         String emailAuthCode = "emailAuthCode";
+        MemberRequestDto.EmailDto emailDto = MemberRequestDto.EmailDto.builder()
+                .email("user@email.com")
+                .emailAuthCode("1111")
+                .build();
 
         // when
-        when(memberRepository.findByEmailCode(emailAuthCode))
+        when(memberRepository.findByEmailAndEmailCode(anyString(), anyString()))
                 .thenReturn(Optional.empty());
 
         // then
-        assertThrows(UserNotExistException.class, () -> memberService.emailAuth(emailAuthCode));
+        assertThrows(UserNotExistException.class, () -> memberService.emailAuth(emailDto));
     }
 
     @Test
     @DisplayName("이메일 인증시 이미 인증이 완료된 회원일 경우 예외 발생")
     void testEmailAuth_AlreadyEmailAuthenticatedException() {
         // given
-        String emailCode = "emailCode";
+        MemberRequestDto.EmailDto emailDto = MemberRequestDto.EmailDto.builder()
+                .email("user@email.com")
+                .emailAuthCode("1111")
+                .build();
 
         Member member = Member.builder()
                 .email("user@email.com")
@@ -271,12 +283,12 @@ class MemberServiceTest {
                 .build();
 
         // when
-        when(memberRepository.findByEmailCode(emailCode))
+        when(memberRepository.findByEmailAndEmailCode(anyString(), anyString()))
                 .thenReturn(Optional.of(member));
 
         // then
         assertThrows(AlreadyEmailAuthenticatedException.class,
-                () -> memberService.emailAuth(emailCode));
+                () -> memberService.emailAuth(emailDto));
     }
 
     @Test
@@ -442,7 +454,4 @@ class MemberServiceTest {
         assertThrows(PasswordNotMatchException.class,
                 () -> memberService.withdraw(withdrawDto));
     }
-
-    // TODO 유효성검사 예외 발생 테스트
-
 }

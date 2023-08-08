@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Slf4j
 @RestController
@@ -27,6 +28,14 @@ public class MemberController {
         return ResponseEntity.ok().body(true);
     }
 
+    @GetMapping("/authEmail")
+    @ApiOperation(value = "회원가입 이메일 인증", notes = "이메일 인증을 진행합니다")
+    public ResponseEntity<?> authenticateEmail(@Valid @ModelAttribute("emailDto")MemberRequestDto.EmailDto emailDto) {
+        memberService.emailAuth(emailDto);
+
+        return ResponseEntity.ok().body(true);
+    }
+
     @PostMapping("/pwdResetMail")
     @PreAuthorize("hasRole('USER')")
     @ApiOperation(value = "비밀번호 초기화 코드 발송", notes = "비밀번호 초기화 코드를 메일로 발송합니다")
@@ -36,13 +45,12 @@ public class MemberController {
         return ResponseEntity.ok().body(true);
     }
 
-    // TODO principal
     @GetMapping("/info")
     @PreAuthorize("hasRole('USER')")
     @ApiOperation(value = "회원정보 조회", notes = "회원정보를 조회합니다")
-    public ResponseEntity<MemberResponseDto.MemberInfoDto> getMyInformation(@RequestParam String email) {
+    public ResponseEntity<MemberResponseDto.MemberInfoDto> getMyInformation(Principal principal) {
         MemberResponseDto.MemberInfoDto memberInfoDto =
-                memberService.myInfo(email);
+                memberService.myInfo(principal.getName());
 
         return ResponseEntity.ok().body(memberInfoDto);
     }
@@ -52,15 +60,6 @@ public class MemberController {
     @ApiOperation(value = "회원정보 수정", notes = "회원정보를 업데이트 합니다")
     public ResponseEntity<?> updateMyInformation(@Valid @RequestBody MemberRequestDto.MemberUpdateInfoDto updateInfoDto) {
         memberService.updateMyInfo(updateInfoDto);
-
-        return ResponseEntity.ok().body(true);
-    }
-
-    @PostMapping("/authEmail")
-    @PreAuthorize("hasRole('USER')")
-    @ApiOperation(value = "회원가입 이메일 인증", notes = "이메일 인증을 진행합니다")
-    public ResponseEntity<?> authenticateEmail(@Valid @RequestBody MemberRequestDto.EmailDto emailDto) {
-        memberService.emailAuth(emailDto.getEmailAuthCode());
 
         return ResponseEntity.ok().body(true);
     }

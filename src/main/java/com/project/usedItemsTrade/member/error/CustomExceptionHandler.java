@@ -22,6 +22,7 @@ import java.util.Set;
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
+    // 회원정보 존재x 예외 처리
     @ExceptionHandler(UsernameNotFoundException.class)
     protected ResponseEntity<ErrorResponse> usernameNotFoundExceptionHandler(UsernameNotFoundException e) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
@@ -34,7 +35,7 @@ public class CustomExceptionHandler {
 
     // 커스텀 예외클래스 처리
     @ExceptionHandler(AbstractException.class)
-    protected ResponseEntity<ErrorResponse> handlerCustomException(AbstractException e) {
+    protected ResponseEntity<ErrorResponse> customExceptionHandler(AbstractException e) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
                 Arrays.asList(e.getMessage()));
 
@@ -45,7 +46,7 @@ public class CustomExceptionHandler {
 
     // 엔티티의 유효성 검사 예외
     @ExceptionHandler(ConstraintViolationException.class)
-    protected ResponseEntity<ErrorResponse> validationException(ConstraintViolationException e) {
+    protected ResponseEntity<ErrorResponse> constraintViolationExceptionHandler(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         StringBuilder errorMessage = new StringBuilder();
         for (ConstraintViolation<?> violation : violations) {
@@ -65,7 +66,7 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    protected ResponseEntity<ErrorResponse> illegalException(IllegalArgumentException e) {
+    protected ResponseEntity<ErrorResponse> illegalExceptionHandler(IllegalArgumentException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code(HttpStatus.BAD_REQUEST.value())
                 .messages(Arrays.asList(e.getMessage()))

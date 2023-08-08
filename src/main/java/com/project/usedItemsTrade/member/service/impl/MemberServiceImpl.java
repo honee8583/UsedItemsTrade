@@ -1,5 +1,6 @@
 package com.project.usedItemsTrade.member.service.impl;
 
+import com.project.usedItemsTrade.board.error.UserNotMatchException;
 import com.project.usedItemsTrade.board.repository.BoardRepository;
 import com.project.usedItemsTrade.member.domain.*;
 import com.project.usedItemsTrade.member.error.exception.*;
@@ -48,7 +49,8 @@ public class MemberServiceImpl implements MemberService {
         mailUtil.sendMail(
                 member.getEmail(),
                 member.getName() + "님 회원가입에 성공하였습니다!!",
-                "링크");  // TODO LINK
+                "<a href='http://localhost:8080/email=" + member.getEmail()
+                        + "&emailAuthCode=" + emailCode + ">회원가입 인증</a>");  // TODO LINK
 
         memberRepository.save(member);
     }
@@ -90,8 +92,8 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void emailAuth(String emailAuthCode) {
-        Member member = memberRepository.findByEmailCode(emailAuthCode)
+    public void emailAuth(MemberRequestDto.EmailDto emailDto) {
+        Member member = memberRepository.findByEmailAndEmailCode(emailDto.getEmail(), emailDto.getEmailAuthCode())
                 .orElseThrow(UserNotExistException::new);
 
         if (member.isEmailAuthYn()) {

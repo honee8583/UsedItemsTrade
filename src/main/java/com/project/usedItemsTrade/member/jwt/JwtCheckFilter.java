@@ -64,7 +64,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String[] excludePath = {"/swagger", "/login", "/member/join", "/v2/", "/favicon"};
+        String[] excludePath = {"/swagger", "/login", "/member/join", "/member/authEmail", "/v2/", "/favicon"};
         String path = request.getRequestURI();
 
         return Arrays.stream(excludePath).anyMatch(path::startsWith);
