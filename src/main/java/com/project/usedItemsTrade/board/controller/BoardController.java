@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -21,8 +23,8 @@ public class BoardController {
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> registerBoard(@RequestBody BoardRequestDto.BoardRegisterDto registerDto, Principal principal) {
-        boardService.register(registerDto, principal.getName());
+    public ResponseEntity<Void> registerBoard(BoardRequestDto.BoardRegisterDto registerDto, MultipartFile[] images, Principal principal) throws IOException {
+        boardService.register(registerDto, images, principal.getName());
 
         return ResponseEntity.ok().build();
     }
@@ -36,10 +38,8 @@ public class BoardController {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> updateBoard(@RequestBody BoardRequestDto.BoardUpdateDto updateDto, Principal principal) {
-        log.info(updateDto.toString());
-
-        boardService.updateBoard(updateDto, principal.getName());
+    public ResponseEntity<Void> updateBoard(BoardRequestDto.BoardUpdateDto updateDto, MultipartFile[] images, Principal principal) {
+        boardService.updateBoard(updateDto, images, principal.getName());
 
         return ResponseEntity.ok().build();
     }
@@ -47,8 +47,6 @@ public class BoardController {
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteBoard(Long id, Principal principal) {
-        log.info("id: " + id);
-
         boardService.deleteBoard(id, principal.getName());
 
         return ResponseEntity.ok().build();

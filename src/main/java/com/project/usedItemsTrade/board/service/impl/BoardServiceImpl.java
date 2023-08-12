@@ -5,7 +5,11 @@ import com.project.usedItemsTrade.board.error.NoBoardExistsException;
 import com.project.usedItemsTrade.board.error.UserNotMatchException;
 import com.project.usedItemsTrade.board.repository.BoardRepository;
 import com.project.usedItemsTrade.board.repository.BoardViewHistoryRepository;
+import com.project.usedItemsTrade.board.repository.ImageRepository;
 import com.project.usedItemsTrade.board.service.BoardService;
+import com.project.usedItemsTrade.board.service.ImageService;
+import com.project.usedItemsTrade.keyword.error.KeywordNotExistsException;
+import com.project.usedItemsTrade.keyword.repository.KeywordRepository;
 import com.project.usedItemsTrade.member.domain.Member;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -18,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,22 +34,38 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
+    private final ImageService imageService;
     private final BoardRepository boardRepository;
+    private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
+    private final KeywordRepository keywordRepository;
     private final BoardViewHistoryRepository boardViewHistoryRepository;
 
-    @Override
-    @Transactional
-    public void register(BoardRequestDto.BoardRegisterDto registerDto, String email) {
+    public void register(BoardRequestDto.BoardRegisterDto registerDto, MultipartFile[] images, String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("작성자가 존재하지 않습니다!"));
+                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 회원입니다!"));
+
+        if (registerDto.getKeywordList() != null && registerDto.getKeywordList().size() == 0) {
+            for(String keywordName : registerDto.getKeywordList()) {
+                keywordRepository.findByKeywordName(keywordName)
+                        .orElseThrow(KeywordNotExistsException::new);
+            }
+        }
 
         Board board = Board.dtoToBoard(registerDto, member.getEmail());
-
         boardRepository.save(board);
+
+        if (images != null && images.length > 0) {
+            List<ImageDto.UploadResultDto> uploadResultDtoList = imageService.uploadImages(images);  // 이미지 업로드
+
+            for (ImageDto.UploadResultDto uploadResultDto : uploadResultDtoList) {
+                imageRepository.save(Image.dtoToEntity(uploadResultDto, board));
+            }
+        }
     }
 
     @Override
+    @Transactional
     public BoardDto get(Long id, String email) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(NoBoardExistsException::new);
@@ -76,12 +97,18 @@ public class BoardServiceImpl implements BoardService {
             }
         }
 
-        return BoardDto.entityToDto(board);
+        List<Image> imageList = imageRepository.findAllByBoard(board);
+        List<ImageDto.UploadResultDto> uploadResultDtoList = imageList
+                .stream()
+                .map(ImageDto.UploadResultDto::entityToDto)
+                .collect(Collectors.toList());
+
+        return BoardDto.entityToDtoWithImageDto(board, uploadResultDtoList);
     }
 
     @Override
     @Transactional
-    public void updateBoard(BoardRequestDto.BoardUpdateDto updateDto, String email) {
+    public void updateBoard(BoardRequestDto.BoardUpdateDto updateDto, MultipartFile[] images, String email) {
         Board board = boardRepository.findById(updateDto.getId())
                 .orElseThrow(NoBoardExistsException::new);
 
@@ -90,8 +117,24 @@ public class BoardServiceImpl implements BoardService {
         }
 
         board.update(updateDto);
-
         boardRepository.save(board);
+
+        // 업로드된 이미지파일들 삭제
+        updateDto.getDeleteImageList().forEach((image)
+                -> imageService.removeFile(image.getImageURL()));
+
+        // 기존 이미지 정보 데이터베이스 삭제
+        imageRepository.deleteByBoard(board);
+
+        if (images != null && images.length > 0) {
+            // 새 이미지 파일 업로드
+            List<ImageDto.UploadResultDto> uploadResultDtoList = imageService.uploadImages(images);
+
+            // 새 이미지 정보 데이터베이스 저장
+            for(ImageDto.UploadResultDto uploadResultDto : uploadResultDtoList) {
+                imageRepository.save(Image.dtoToEntity(uploadResultDto, board));
+            }
+        }
     }
 
     @Override
@@ -104,6 +147,7 @@ public class BoardServiceImpl implements BoardService {
             throw new UserNotMatchException();
         }
 
+        imageRepository.deleteByBoard(board);
         boardRepository.delete(board);
     }
 

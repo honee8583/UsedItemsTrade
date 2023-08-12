@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Builder
-@ToString
+@ToString(exclude = "member")
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,8 +33,9 @@ public class Board extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private BoardStatus boardStatus;
 
-    @OneToMany
-    private List<Keyword> keywordList = new ArrayList<>();
+    @Builder.Default
+    @ElementCollection
+    private List<String> keywordList = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> replyList = new ArrayList<>();
@@ -51,15 +52,13 @@ public class Board extends BaseEntity {
         this.content = updateDto.getContent();
         this.price = updateDto.getPrice();
         this.boardStatus = updateDto.getBoardStatus();
+        this.keywordList = updateDto.getUpdateKeywordList();
     }
 
     public static Board dtoToBoard(BoardRequestDto.BoardRegisterDto registerDto, String email) {
-        List<Keyword> keywordList = new ArrayList<>();
-        if (registerDto.getKeywordIds() != null) {
-            keywordList = registerDto.getKeywordIds()
-                    .stream()
-                    .map(id -> Keyword.builder().id(id).build())
-                    .collect(Collectors.toList());
+        List<String> keywordList = new ArrayList<>();
+        if (registerDto.getKeywordList() != null) {
+            keywordList.addAll(registerDto.getKeywordList());
         }
 
         return Board.builder()

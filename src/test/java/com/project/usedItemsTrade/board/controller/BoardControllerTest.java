@@ -50,7 +50,7 @@ class BoardControllerTest {
                 .build();
 
         // when
-        doNothing().when(boardService).register(registerDto, "user@email.com");
+        doNothing().when(boardService).register(registerDto, null, "user@email.com");
 
         // then
         mockMvc.perform(post("/board/register")
@@ -101,7 +101,7 @@ class BoardControllerTest {
                 .build();
 
         // when
-        doNothing().when(boardService).updateBoard(updateDto, "test@email.com");
+        doNothing().when(boardService).updateBoard(updateDto, null, "test@email.com");
 
         // then
         mockMvc.perform(put("/board/update")

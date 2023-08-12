@@ -1,6 +1,5 @@
 package com.project.usedItemsTrade.board.domain;
 
-import com.project.usedItemsTrade.keyword.domain.KeywordDto;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -19,7 +18,11 @@ public class BoardRequestDto {
         private String content;
         private int price;
         private BoardStatus boardStatus;
-        private List<Long> keywordIds = new ArrayList<>();
+        private List<String> keywordList = new ArrayList<>();
+
+        // 파일을 업로드하고 반환된 UploadResultDto로부터 ImageUploadDto 객체를 생성해 가져온다.
+//        @Builder.Default
+//        private List<ImageDto.ImageUploadDto> uploadDtoList = new ArrayList<>();
     }
 
     @Getter
@@ -34,6 +37,12 @@ public class BoardRequestDto {
         private String content;
         private int price;
         private BoardStatus boardStatus;
+
+        @Builder.Default
+        private List<String> updateKeywordList = new ArrayList<>();     // 수정 키워드 리스트
+
+        @Builder.Default
+        private List<ImageDto.ImageUploadDto> deleteImageList = new ArrayList<>();  // 삭제 이미지
     }
 
     @Getter
@@ -47,7 +56,6 @@ public class BoardRequestDto {
         private final int size = 10;
         private String type;    // Title, Content
         private String keyword;
-//        private String order;   // createdAt, price, view
         private boolean priceOrder;
         private boolean viewOrder;
         private boolean createdAtOrder;

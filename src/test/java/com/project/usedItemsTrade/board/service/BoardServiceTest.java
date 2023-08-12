@@ -5,7 +5,9 @@ import com.project.usedItemsTrade.board.error.NoBoardExistsException;
 import com.project.usedItemsTrade.board.error.UserNotMatchException;
 import com.project.usedItemsTrade.board.repository.BoardRepository;
 import com.project.usedItemsTrade.board.repository.BoardViewHistoryRepository;
+import com.project.usedItemsTrade.board.repository.ImageRepository;
 import com.project.usedItemsTrade.board.service.impl.BoardServiceImpl;
+import com.project.usedItemsTrade.board.service.impl.ImageServiceImpl;
 import com.project.usedItemsTrade.member.domain.Member;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -21,8 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +41,12 @@ class BoardServiceTest {
 
     @Mock
     private BoardRepository boardRepository;
+
+    @Mock
+    private ImageRepository imageRepository;
+
+    @Mock
+    private ImageServiceImpl imageService;
 
     @Mock
     private BoardViewHistoryRepository viewHistoryRepository;
@@ -81,7 +91,7 @@ class BoardServiceTest {
 
     @Test
     @DisplayName("Board 업로드 테스트")
-    void testRegister() {
+    void testRegister() throws IOException {
         // given
         BoardRequestDto.BoardRegisterDto registerDto = BoardRequestDto.BoardRegisterDto
                 .builder()
@@ -99,7 +109,7 @@ class BoardServiceTest {
                 .willReturn(Optional.of(member));
 
         // when
-        boardService.register(registerDto, "user@email.com");
+        boardService.register(registerDto, null,"user@email.com");
 
         // then
         verify(boardRepository, times(1)).save(any(Board.class));
@@ -126,7 +136,7 @@ class BoardServiceTest {
 
         // then
         assertThrows(UsernameNotFoundException.class,
-                () -> boardService.register(registerDto, "user@email.com"));
+                () -> boardService.register(registerDto,null,"user@email.com"));
     }
 
     @Test
@@ -209,7 +219,7 @@ class BoardServiceTest {
         given(boardRepository.findById(anyLong())).willReturn(Optional.of(board));
 
         // when
-        boardService.updateBoard(updateDto, "user@email.com");
+        boardService.updateBoard(updateDto, null, "user@email.com");
 
         // then
         verify(boardRepository, times(1)).save(any(Board.class));
@@ -237,7 +247,7 @@ class BoardServiceTest {
 
         // then
         assertThrows(NoBoardExistsException.class,
-                () -> boardService.updateBoard(updateDto, "user@email.com"));
+                () -> boardService.updateBoard(updateDto, null, "user@email.com"));
     }
 
     @Test
@@ -261,7 +271,7 @@ class BoardServiceTest {
 
         // then
         assertThrows(UserNotMatchException.class,
-                () -> boardService.updateBoard(updateDto, "user2@email.com"));
+                () -> boardService.updateBoard(updateDto, null, "user2@email.com"));
 
     }
 
@@ -283,6 +293,7 @@ class BoardServiceTest {
 
         // then
         verify(boardRepository, times(1)).delete(any(Board.class));
+        verify(imageRepository, times(1)).deleteByBoard(any(Board.class));
     }
 
     @Test
