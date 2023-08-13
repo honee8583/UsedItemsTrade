@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,7 +66,7 @@ public class ImageServiceImpl implements ImageService {
 
     // 인코딩된 파일 이름을 파라미터로 받아서 해당 파일을 byte[]로 만들어서 브라우저로 전송
     @Override
-    public byte[] getFile(String fileName) {
+    public ResponseEntity<byte[]> getFile(String fileName) {
         try{
             String srcFileName = URLDecoder.decode(fileName, "UTF-8");
             log.info("fileName: " + srcFileName);
@@ -75,7 +77,7 @@ public class ImageServiceImpl implements ImageService {
             HttpHeaders header = new HttpHeaders();
             header.add("Content-Type", Files.probeContentType(file.toPath()));  // 파일확장자에 따른 MIME타입
 
-            return FileCopyUtils.copyToByteArray(file);
+            return new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), header, HttpStatus.OK);
         } catch(Exception e) {
             throw new RuntimeException("이미지를 불러오는데 실패하였습니다!");  // TODO CustomException
         }

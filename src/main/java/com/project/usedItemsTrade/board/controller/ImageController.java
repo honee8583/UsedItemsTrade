@@ -29,9 +29,8 @@ public class ImageController {
 
     @GetMapping("/display")
     public ResponseEntity<byte[]> getFile(String fileName) {
-        byte[] imageByte = imageService.getFile(fileName);
 
-        return ResponseEntity.ok().body(imageByte);
+        return imageService.getFile(fileName);
     }
 
     @PostMapping("/removeFile")
