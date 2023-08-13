@@ -45,16 +45,19 @@ public class BoardServiceImpl implements BoardService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 회원입니다!"));
 
-        if (registerDto.getKeywordList() != null && registerDto.getKeywordList().size() == 0) {
+        // 받아온 키워드 리스트가 있을 경우 존재하는 키워드인지 검사
+        if (registerDto.getKeywordList() != null && registerDto.getKeywordList().size() > 0) {
             for(String keywordName : registerDto.getKeywordList()) {
                 keywordRepository.findByKeywordName(keywordName)
                         .orElseThrow(KeywordNotExistsException::new);
             }
         }
 
+        // 게시글 저장
         Board board = Board.dtoToBoard(registerDto, member.getEmail());
         boardRepository.save(board);
 
+        // 이미지 저장
         if (images != null && images.length > 0) {
             List<ImageDto.UploadResultDto> uploadResultDtoList = imageService.uploadImages(images);  // 이미지 업로드
 
