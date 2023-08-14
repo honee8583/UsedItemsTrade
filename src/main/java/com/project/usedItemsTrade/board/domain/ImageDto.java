@@ -1,5 +1,6 @@
 package com.project.usedItemsTrade.board.domain;
 
+import com.project.usedItemsTrade.board.error.GetImageUrlFailedException;
 import lombok.*;
 
 import java.io.Serializable;
@@ -23,7 +24,7 @@ public class ImageDto {
             try {
                 return URLEncoder.encode(folderPath + "/" + uuid + "_" + fileName, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("이미지 Url을 가져오는데에 실패하였습니다!"); // TODO CUSTOM EXCEPTION
+                throw new GetImageUrlFailedException();
             }
         }
     }
@@ -45,7 +46,7 @@ public class ImageDto {
             try {
                 return URLEncoder.encode(folderPath + "/" + uuid + "_" + fileName, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("이미지 Url을 가져오는데에 실패하였습니다!"); // TODO CUSTOM EXCEPTION
+                throw new GetImageUrlFailedException();
             }
         }
 

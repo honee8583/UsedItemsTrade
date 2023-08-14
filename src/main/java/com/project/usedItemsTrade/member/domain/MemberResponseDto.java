@@ -14,7 +14,7 @@ public class MemberResponseDto {
         private String email;
         private String name;
         private String phone;
-        private MemberStatus status;  // TODO 넣을지 말지
+        private MemberStatus status;
 
         public static MemberInfoDto memberToInfoDto(Member member) {
             return MemberInfoDto.builder()

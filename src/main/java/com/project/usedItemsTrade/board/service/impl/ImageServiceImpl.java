@@ -1,6 +1,10 @@
 package com.project.usedItemsTrade.board.service.impl;
 
 import com.project.usedItemsTrade.board.domain.ImageDto;
+import com.project.usedItemsTrade.board.error.DeleteImageFailedException;
+import com.project.usedItemsTrade.board.error.ImageUploadFailedException;
+import com.project.usedItemsTrade.board.error.NotImageTypeException;
+import com.project.usedItemsTrade.board.error.SelectImageFailedException;
 import com.project.usedItemsTrade.board.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +41,7 @@ public class ImageServiceImpl implements ImageService {
         List<ImageDto.UploadResultDto> resultDtoList = new ArrayList<>();
         for (MultipartFile file : images) {
             if(!file.getContentType().startsWith("image")) {
-                log.warn("this is not image type");
-                throw new RuntimeException("이미지 파일은 업로드가 불가능합니다!");     // TODO HttpStatus.FORBIDDEN 리턴(CustomException)
+                throw new NotImageTypeException();
             }
 
             String originalName = file.getOriginalFilename();
@@ -57,7 +60,7 @@ public class ImageServiceImpl implements ImageService {
                 file.transferTo(savePath);
                 resultDtoList.add(new ImageDto.UploadResultDto(null, fileName, uuid, folderPath));
             } catch (IOException e) {
-                throw new RuntimeException("파일을 저장하는데 실패하였습니다!");   // TODO CustomException
+                throw new ImageUploadFailedException();
             }
         }
 
@@ -79,7 +82,7 @@ public class ImageServiceImpl implements ImageService {
 
             return new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), header, HttpStatus.OK);
         } catch(Exception e) {
-            throw new RuntimeException("이미지를 불러오는데 실패하였습니다!");  // TODO CustomException
+            throw new SelectImageFailedException();
         }
     }
 
@@ -92,7 +95,7 @@ public class ImageServiceImpl implements ImageService {
 
             return file.delete();
         } catch(UnsupportedEncodingException e) {
-            throw new RuntimeException("파일 삭제에 실패하였습니다!");  // TODO CustomException(파일삭제)
+            throw new DeleteImageFailedException();
         }
     }
 

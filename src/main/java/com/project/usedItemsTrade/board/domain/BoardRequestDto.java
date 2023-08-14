@@ -50,12 +50,11 @@ public class BoardRequestDto {
     public static class BoardSearchDto {
         private int page = 0;
         private final int size = 10;
-        private String type;    // Title, Content
+        private String type;
         private String keyword;
         private boolean priceOrder;
         private boolean viewOrder;
         private boolean createdAtOrder;
-        // TODO BoardStatus가 Sell인 물건 검색
     }
 
     @Getter

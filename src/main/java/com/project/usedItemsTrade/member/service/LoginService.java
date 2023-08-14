@@ -4,6 +4,8 @@ import com.project.usedItemsTrade.member.domain.JwtToken;
 import com.project.usedItemsTrade.member.domain.Member;
 import com.project.usedItemsTrade.member.domain.MemberRequestDto;
 import com.project.usedItemsTrade.member.domain.Role;
+import com.project.usedItemsTrade.member.error.exception.JwtTokenNotValidException;
+import com.project.usedItemsTrade.member.error.exception.PasswordNotMatchException;
 import com.project.usedItemsTrade.member.jwt.JwtTokenProvider;
 import com.project.usedItemsTrade.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +99,7 @@ public class LoginService {
         Member member = optionalMember.get();
 
         if (!passwordEncoder.matches(loginDTO.getPassword(), member.getPassword())) {
-            throw new RuntimeException("Password doesn't match!");  // TODO 커스텀 예외 처리
+            throw new PasswordNotMatchException();
         }
 
         List<SimpleGrantedAuthority> roles =
@@ -122,7 +124,7 @@ public class LoginService {
         refreshToken = refreshToken.substring(TOKEN_PREFIX.length());
 
         if (!tokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException(">> 토큰이 유효하지 않습니다!");    // TODO Create Custom Exception
+            throw new JwtTokenNotValidException();
         }
 
         String username = tokenProvider.getUsername(refreshToken);

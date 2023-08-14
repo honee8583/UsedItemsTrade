@@ -50,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
                 member.getEmail(),
                 member.getName() + "님 회원가입에 성공하였습니다!!",
                 "<a href='http://localhost:8080/email=" + member.getEmail()
-                        + "&emailAuthCode=" + emailCode + ">회원가입 인증</a>");  // TODO LINK
+                        + "&emailAuthCode=" + emailCode + ">회원가입 인증</a>");
 
         memberRepository.save(member);
     }
