@@ -115,10 +115,13 @@ class BoardControllerTest {
     @DisplayName("deleteBoard 컨트롤러 메소드 테스트")
     void testDeleteBoard() throws Exception {
         // given
-        Long id = 1L;
+        BoardRequestDto.BoardDeleteDto deleteDto = BoardRequestDto.BoardDeleteDto
+                .builder()
+                .boardId(1L)
+                .build();
 
         // when
-        doNothing().when(boardService).deleteBoard(id, "user@email.com");
+        doNothing().when(boardService).deleteBoard(deleteDto, "user@email.com");
 
         // then
         mockMvc.perform(delete("/board/delete?id=1")

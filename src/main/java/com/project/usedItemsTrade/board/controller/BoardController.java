@@ -46,8 +46,8 @@ public class BoardController {
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteBoard(Long id, Principal principal) {
-        boardService.deleteBoard(id, principal.getName());
+    public ResponseEntity<Void> deleteBoard(@RequestBody BoardRequestDto.BoardDeleteDto deleteDto, Principal principal) {
+        boardService.deleteBoard(deleteDto, principal.getName());
 
         return ResponseEntity.ok().build();
     }

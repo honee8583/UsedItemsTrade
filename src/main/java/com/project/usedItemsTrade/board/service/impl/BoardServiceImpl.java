@@ -142,15 +142,22 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
-    public void deleteBoard(Long id, String email) {
-        Board board = boardRepository.findById(id)
+    public void deleteBoard(BoardRequestDto.BoardDeleteDto deleteDto, String email) {
+        Board board = boardRepository.findById(deleteDto.getBoardId())
                 .orElseThrow(NoBoardExistsException::new);
 
         if (!board.getMember().getEmail().equals(email)) {
             throw new UserNotMatchException();
         }
 
-        imageRepository.deleteByBoard(board);
+        // 업로드된 이미지 삭제
+        if (deleteDto.getDeleteImageList() != null && deleteDto.getDeleteImageList().size() > 0) {
+            for (ImageDto.UploadResultDto resultDto : deleteDto.getDeleteImageList()) {
+                imageService.removeFile(resultDto.getImageURL());
+            }
+            imageRepository.deleteByBoard(board);
+        }
+
         boardRepository.delete(board);
     }
 

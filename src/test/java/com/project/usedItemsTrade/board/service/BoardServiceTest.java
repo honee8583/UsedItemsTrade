@@ -279,7 +279,11 @@ class BoardServiceTest {
     @DisplayName("Board 삭제 테스트")
     void testDeleteBoard() {
         // given
-        Long id = 1L;
+        BoardRequestDto.BoardDeleteDto deleteDto = BoardRequestDto.BoardDeleteDto
+                .builder()
+                .boardId(1L)
+                .build();
+
         Board board = Board.builder()
                 .id(1L)
                 .member(Member.builder().email("user@email.com").build())
@@ -289,33 +293,39 @@ class BoardServiceTest {
                 .willReturn(Optional.of(board));
 
         // when
-        boardService.deleteBoard(id, "user@email.com");
+        boardService.deleteBoard(deleteDto, "user@email.com");
 
         // then
         verify(boardRepository, times(1)).delete(any(Board.class));
-        verify(imageRepository, times(1)).deleteByBoard(any(Board.class));
     }
 
     @Test
     @DisplayName("Board 삭제시 존재하지 않는 게시글일 경우 예외 발생 테스트")
     void testDeleteBoard_NoBoardExistsException() {
         // given
-        Long id = 1L;
+        BoardRequestDto.BoardDeleteDto deleteDto = BoardRequestDto.BoardDeleteDto
+                .builder()
+                .boardId(1L)
+                .build();
         String email = "user@email.com";
 
         // when
-        when(boardRepository.findById(id))
+        when(boardRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
         // then
         assertThrows(NoBoardExistsException.class,
-                () -> boardService.deleteBoard(id, email));
+                () -> boardService.deleteBoard(deleteDto, email));
     }
 
     @Test
     void testDeleteBoard_UserNotMatchException() {
         // given
-        Long id = 1L;
+        BoardRequestDto.BoardDeleteDto deleteDto = BoardRequestDto.BoardDeleteDto
+                .builder()
+                .boardId(1L)
+                .build();
+
         String email = "user2@email.com";
 
         Board board = Board.builder()
@@ -328,7 +338,7 @@ class BoardServiceTest {
 
         // then
         assertThrows(UserNotMatchException.class,
-                () -> boardService.deleteBoard(id, email));
+                () -> boardService.deleteBoard(deleteDto, email));
     }
 
     @Test

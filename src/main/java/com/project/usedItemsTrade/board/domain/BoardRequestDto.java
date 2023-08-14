@@ -19,10 +19,6 @@ public class BoardRequestDto {
         private int price;
         private BoardStatus boardStatus;
         private List<String> keywordList = new ArrayList<>();
-
-        // 파일을 업로드하고 반환된 UploadResultDto로부터 ImageUploadDto 객체를 생성해 가져온다.
-//        @Builder.Default
-//        private List<ImageDto.ImageUploadDto> uploadDtoList = new ArrayList<>();
     }
 
     @Getter
@@ -62,5 +58,16 @@ public class BoardRequestDto {
         // TODO BoardStatus가 Sell인 물건 검색
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BoardDeleteDto {
+        private Long boardId;
 
+        @Builder.Default
+        private List<ImageDto.UploadResultDto> deleteImageList = new ArrayList<>();
+    }
 }

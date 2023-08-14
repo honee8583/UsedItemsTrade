@@ -15,7 +15,7 @@ public interface BoardService {
     // 게시물 수정 상태변환(판매중/거래중/거래완료)
     void updateBoard(BoardRequestDto.BoardUpdateDto updateDto, MultipartFile[] images, String email);
     // 게시글 삭제
-    void deleteBoard(Long id, String email);
+    void deleteBoard(BoardRequestDto.BoardDeleteDto deleteDto, String email);
     // 게시물 검색(제목, 내용, 가격정렬)
     List<BoardDto> searchBoard(BoardRequestDto.BoardSearchDto searchDto);
     // TODO 키워드를 이용한 검색
